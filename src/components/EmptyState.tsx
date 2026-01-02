@@ -33,7 +33,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
             <Presentation className="h-10 w-10 text-primary" />
           </div>
           <h1 className="text-3xl md:text-4xl text-foreground mb-3 font-extrabold text-center">
-            Welcome to <span className="text-gradient">SmartPitch Coach</span>
+            Welcome to <span className="text-primary font-extrabold">SmartPitch Coach</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-md mx-auto">
             Transform your slides into confident presentations with AI-powered speaker guides
