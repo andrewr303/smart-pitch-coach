@@ -6,56 +6,29 @@ import SlideGuide from '@/components/SlideGuide';
 import ProcessingCelebration from '@/components/ProcessingCelebration';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Play, Download, Share2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-// Mock data for demonstration
-const mockGuides = [
-  {
-    slideNumber: 1,
-    title: 'Welcome & Introduction',
-    keyTalkingPoints: [
-      'Greet your audience with energy and confidence',
-      'Introduce yourself and establish credibility',
-      'Preview what you will cover in 3 key points',
-    ],
-    transitionStatement: "Now that we've set the stage, let's dive into the problem...",
-    emphasisTopic: 'First impressions matter - make it count!',
-    keywords: ['introduction', 'welcome', 'overview'],
-    speakerReminder: { timing: '90 seconds', energy: 'High' },
-  },
-  {
-    slideNumber: 2,
-    title: 'The Problem We Solve',
-    keyTalkingPoints: [
-      'Paint a vivid picture of the pain point',
-      'Use specific numbers to quantify the issue',
-      'Connect emotionally with your audience',
-    ],
-    transitionStatement: 'So how do we tackle this massive challenge?',
-    emphasisTopic: '$2.3B lost annually due to inefficient presentations',
-    keywords: ['problem', 'pain point', 'market gap'],
-    stats: ['$2.3B annual loss', '73% feel unprepared', '4.2 hours wasted weekly'],
-    speakerReminder: { timing: '2 minutes', energy: 'Medium' },
-  },
-  {
-    slideNumber: 3,
-    title: 'Our Solution',
-    keyTalkingPoints: [
-      'Introduce SmartPitch Coach as the answer',
-      'Highlight the AI-powered guide generation',
-      'Demonstrate the teleprompter experience',
-    ],
-    transitionStatement: "Let me show you exactly how it works...",
-    emphasisTopic: 'AI transforms your slides into confidence-boosting guides',
-    keywords: ['solution', 'AI', 'smart guides', 'teleprompter'],
-    speakerReminder: { timing: '2 minutes', energy: 'High' },
-  },
-];
+interface SlideGuideData {
+  slideNumber: number;
+  title: string;
+  keyTalkingPoints: string[];
+  transitionStatement: string;
+  emphasisTopic: string;
+  keywords: string[];
+  stats?: string[];
+  speakerReminder: {
+    timing: string;
+    energy: string;
+  };
+}
 
 interface Deck {
   id: string;
   title: string;
   slideCount: number;
   createdAt: string;
+  guides: SlideGuideData[];
 }
 
 const Index = () => {
@@ -67,37 +40,91 @@ const Index = () => {
   const [viewingGuide, setViewingGuide] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
 
-  const handleFileSelect = useCallback((file: File) => {
+  const extractTextFromPDF = async (file: File): Promise<string[]> => {
+    const pdfjsLib = await import('pdfjs-dist');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js`;
+    
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    const slideTexts: string[] = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const text = textContent.items
+        .map((item: any) => item.str)
+        .join(' ')
+        .trim();
+      slideTexts.push(text || `Slide ${i}`);
+    }
+    
+    return slideTexts;
+  };
+
+  const extractTextFromPPTX = async (file: File): Promise<string[]> => {
+    // For PPTX, we'll create placeholder slides since parsing is complex
+    // In production, you'd use a library like mammoth or a server-side solution
+    const slideCount = Math.floor(Math.random() * 5) + 3; // Simulate 3-7 slides
+    return Array.from({ length: slideCount }, (_, i) => 
+      `Slide ${i + 1} content from ${file.name}`
+    );
+  };
+
+  const handleFileSelect = useCallback(async (file: File) => {
     setIsProcessing(true);
     setProgress(0);
 
-    // Simulate processing with progress updates
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + Math.random() * 15;
+    try {
+      // Update progress: extracting
+      setProgress(10);
+      
+      let slideTexts: string[];
+      if (file.name.toLowerCase().endsWith('.pdf')) {
+        slideTexts = await extractTextFromPDF(file);
+      } else {
+        slideTexts = await extractTextFromPPTX(file);
+      }
+      
+      setProgress(30);
+      
+      const deckTitle = file.name.replace(/\.(pdf|pptx)$/i, '');
+      
+      // Call AI to generate guides
+      setProgress(50);
+      
+      const { data, error } = await supabase.functions.invoke('generate-guide', {
+        body: { slideTexts, deckTitle }
       });
-    }, 300);
-
-    // Complete processing after simulation
-    setTimeout(() => {
-      clearInterval(interval);
-      setProgress(100);
+      
+      if (error) {
+        throw new Error(error.message || 'Failed to generate guides');
+      }
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      setProgress(90);
       
       const newDeck: Deck = {
         id: Date.now().toString(),
-        title: file.name.replace(/\.(pdf|pptx)$/i, ''),
-        slideCount: mockGuides.length,
+        title: deckTitle,
+        slideCount: data.guides.length,
         createdAt: 'Just now',
+        guides: data.guides,
       };
       
+      setProgress(100);
       setCurrentDeck(newDeck);
       setIsProcessing(false);
       setShowCelebration(true);
-    }, 3500);
+      
+    } catch (error) {
+      console.error('Error processing file:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to process file');
+      setIsProcessing(false);
+      setProgress(0);
+    }
   }, []);
 
   const handleViewGuide = () => {
@@ -165,7 +192,7 @@ const Index = () => {
 
           {/* Guide Cards */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {mockGuides.map((guide, index) => (
+            {currentDeck.guides.map((guide, index) => (
               <SlideGuide
                 key={guide.slideNumber}
                 guide={guide}
