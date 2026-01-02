@@ -32,8 +32,8 @@ const EmptyState: React.FC<EmptyStateProps> = ({
           <div className="inline-flex items-center justify-center h-20 w-20 rounded-2xl bg-primary/10 mb-6 animate-float">
             <Presentation className="h-10 w-10 text-primary" />
           </div>
-          <h1 className="text-3xl md:text-4xl text-foreground mb-3 bg-primary-foreground font-extrabold text-center">
-            Welcome to <span className="text-gradient text-black bg-primary-foreground">SmartPitch Coach</span>
+          <h1 className="text-3xl md:text-4xl text-foreground mb-3 font-extrabold text-center">
+            Welcome to <span className="text-gradient">SmartPitch Coach</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-md mx-auto">
             Transform your slides into confident presentations with AI-powered speaker guides
