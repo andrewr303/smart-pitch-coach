@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import Header from '@/components/Header';
 import EmptyState from '@/components/EmptyState';
 import DeckCard from '@/components/DeckCard';
-import SlideGuide from '@/components/SlideGuide';
+import SpeakerGuideView from '@/components/SpeakerGuideView';
 import ProcessingCelebration from '@/components/ProcessingCelebration';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Play, Download, Share2 } from 'lucide-react';
@@ -148,62 +148,14 @@ const Index = () => {
     setDecks([]);
   };
 
-  // Guide View
+  // Guide View - Slide by slide focused view
   if (viewingGuide && currentDeck) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header onNewDeck={handleNewDeck} />
-        
-        <div className="container py-6 px-4 md:px-6">
-          {/* Back & Actions */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <button
-              onClick={handleBackToDashboard}
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Dashboard</span>
-            </button>
-            
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Download className="h-4 w-4" />
-                Export
-              </Button>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Share2 className="h-4 w-4" />
-                Share
-              </Button>
-              <Button size="sm" className="gap-2">
-                <Play className="h-4 w-4" />
-                Live Mode
-              </Button>
-            </div>
-          </div>
-
-          {/* Deck Title */}
-          <div className="mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-              {currentDeck.title}
-            </h1>
-            <p className="text-muted-foreground">
-              {currentDeck.slideCount} slides • Created {currentDeck.createdAt}
-            </p>
-          </div>
-
-          {/* Guide Cards */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {currentDeck.guides.map((guide, index) => (
-              <SlideGuide
-                key={guide.slideNumber}
-                guide={guide}
-                isActive={activeSlide === index}
-                onClick={() => setActiveSlide(index)}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+      <SpeakerGuideView 
+        guides={currentDeck.guides}
+        deckTitle={currentDeck.title}
+        onBack={handleBackToDashboard}
+      />
     );
   }
 
