@@ -1,5 +1,22 @@
 import { useCallback, useState } from 'react';
 import { Upload, FileText, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+const isValidFile = (file: File) => {
+  const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'];
+  const validType = validTypes.includes(file.type) || file.name.endsWith('.pptx') || file.name.endsWith('.pdf') || file.name.endsWith('.ppt');
+  if (!validType) {
+    toast.error('Invalid file type. Please upload a PDF or PPTX file.');
+    return false;
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    toast.error(`File too large. Maximum size is ${MAX_FILE_SIZE / (1024 * 1024)}MB.`);
+    return false;
+  }
+  return true;
+};
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
@@ -13,12 +30,12 @@ export default function FileUpload({ onFileSelect, isProcessing }: FileUploadPro
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
-    if (file) onFileSelect(file);
+    if (file && isValidFile(file)) onFileSelect(file);
   }, [onFileSelect]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) onFileSelect(file);
+    if (file && isValidFile(file)) onFileSelect(file);
   };
 
   return (
