@@ -1,7 +1,7 @@
 # 🎤 SmartPitch Coach
 
 <p align="center">
-  <img src="screenshot.png" alt="SmartPitch Coach Screenshot" width="700" />
+  <img src="screenshot.jpeg" alt="SmartPitch Coach Screenshot" width="700" />
 </p>
 
 <p align="center">
