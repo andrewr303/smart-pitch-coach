@@ -8,14 +8,6 @@
   <strong>Transform your slides into confident presentations with AI-powered speaker guides.</strong>
 </p>
 
-<p align="center">
-  <a href="https://guide-my-pitch.lovable.app">🌐 Live Demo</a> •
-  <a href="#features">✨ Features</a> •
-  <a href="#getting-started">🚀 Getting Started</a> •
-  <a href="#tech-stack">🛠 Tech Stack</a> •
-  <a href="#contributing">🤝 Contributing</a>
-</p>
-
 ---
 
 ## 📖 About
