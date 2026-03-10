@@ -33,9 +33,7 @@ const Login: React.FC = () => {
           },
         });
         if (error) throw error;
-        setError(null);
-        setIsSignUp(false);
-        setError('Check your email to confirm your account, then sign in.');
+        navigate('/');
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -97,7 +95,7 @@ const Login: React.FC = () => {
               </div>
 
               {error && (
-                <p className={`text-sm ${error.startsWith('Check your email') ? 'text-green-600' : 'text-destructive'}`}>
+                <p className="text-sm text-destructive">
                   {error}
                 </p>
               )}
