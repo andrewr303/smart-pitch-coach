@@ -1,4 +1,13 @@
-project_id = "fomheodxeecosxyfqsos"
+project_id = "comjatvjmytwtbmtzcie"
+
+[auth]
+enabled = true
+site_url = "http://localhost:8080"
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = false
+enable_confirmations = false
 
 [functions.generate-guide]
 verify_jwt = false

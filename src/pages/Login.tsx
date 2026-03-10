@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
+const PRODUCTION_URL = 'https://pitchcoach.founderpilot.ai';
+
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
@@ -14,6 +16,7 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const emailRedirectTo = `${window.location.origin === 'http://localhost:5173' ? window.location.origin : PRODUCTION_URL}/`;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,11 +25,16 @@ const Login: React.FC = () => {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo,
+          },
+        });
         if (error) throw error;
         setError(null);
         setIsSignUp(false);
-        // Show a success-like message reusing the error state field
         setError('Check your email to confirm your account, then sign in.');
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });

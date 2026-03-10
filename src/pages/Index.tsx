@@ -9,9 +9,8 @@ import { ArrowLeft, Play, Download, Share2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import * as pdfjsLib from 'pdfjs-dist';
-import pdfWorkerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
 interface SlideGuideData {
   slideNumber: number;
@@ -96,13 +95,29 @@ const Index = () => {
       const { data, error } = await supabase.functions.invoke('generate-guide', {
         body: { slideTexts, deckTitle }
       });
-      
+
       if (error) {
-        throw new Error(error.message || 'Failed to generate guides');
+        // supabase.functions.invoke wraps non-2xx responses in a FunctionsHttpError
+        // whose .message is generic; the real error is in the response context.
+        let detail: string | undefined;
+        try {
+          const ctx = (error as any).context;
+          if (ctx instanceof Response) {
+            const body = await ctx.json();
+            detail = body?.error;
+          }
+        } catch {
+          // ignore – fall through to generic message
+        }
+        throw new Error(detail || error.message || 'Failed to generate guides');
       }
-      
-      if (data.error) {
+
+      if (data?.error) {
         throw new Error(data.error);
+      }
+
+      if (!data?.guides) {
+        throw new Error('No guides returned. Please try again.');
       }
       
       setProgress(90);
