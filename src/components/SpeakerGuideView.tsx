@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Play, Pause, RotateCcw, X, Image, ArrowRight, Lightbulb, MessageCircle } from 'lucide-react';
 
 interface SlideGuideData {
@@ -59,11 +59,11 @@ export default function SpeakerGuideView({ guides, deckTitle, onBack }: SpeakerG
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const goToSlide = (index: number) => {
+  const goToSlide = useCallback((index: number) => {
     if (index >= 0 && index < totalSlides) {
       setCurrentSlide(index);
     }
-  };
+  }, [totalSlides]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -74,7 +74,7 @@ export default function SpeakerGuideView({ guides, deckTitle, onBack }: SpeakerG
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentSlide, isPlaying, onBack]);
+  }, [currentSlide, isPlaying, onBack, goToSlide]);
 
   return (
     <div className="h-screen flex flex-col bg-background">
@@ -95,12 +95,16 @@ export default function SpeakerGuideView({ guides, deckTitle, onBack }: SpeakerG
           <button
             onClick={() => setIsPlaying(!isPlaying)}
             className="p-1 hover:bg-accent/20 rounded transition-colors"
+            aria-label={isPlaying ? 'Pause timer' : 'Start timer'}
+            title={isPlaying ? 'Pause timer' : 'Start timer'}
           >
             {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </button>
           <button
             onClick={() => setElapsedTime(0)}
             className="p-1 hover:bg-accent/20 rounded transition-colors"
+            aria-label="Reset timer"
+            title="Reset timer"
           >
             <RotateCcw className="h-4 w-4" />
           </button>
@@ -252,6 +256,8 @@ export default function SpeakerGuideView({ guides, deckTitle, onBack }: SpeakerG
                 onClick={() => goToSlide(currentSlide - 1)}
                 disabled={currentSlide === 0}
                 className="h-12 w-12 rounded-full bg-muted flex items-center justify-center disabled:opacity-40 hover:bg-accent/20 transition-colors"
+                aria-label="Previous slide"
+                title="Previous slide"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
@@ -266,6 +272,8 @@ export default function SpeakerGuideView({ guides, deckTitle, onBack }: SpeakerG
                 onClick={() => goToSlide(currentSlide + 1)}
                 disabled={currentSlide === totalSlides - 1}
                 className="h-12 w-12 rounded-full bg-success flex items-center justify-center disabled:opacity-40 hover:bg-success/80 transition-colors"
+                aria-label="Next slide"
+                title="Next slide"
               >
                 <ChevronRight className="h-5 w-5 text-success-foreground" />
               </button>
@@ -281,6 +289,8 @@ export default function SpeakerGuideView({ guides, deckTitle, onBack }: SpeakerG
             <button
               onClick={() => setShowThumbnail(false)}
               className="absolute -top-4 -right-4 h-10 w-10 rounded-full bg-muted flex items-center justify-center hover:bg-accent/20 z-10"
+              aria-label="Close thumbnail preview"
+              title="Close thumbnail preview"
             >
               <X className="h-5 w-5" />
             </button>
