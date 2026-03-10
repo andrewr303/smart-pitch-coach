@@ -21,6 +21,7 @@ interface SlideGuideData {
   emphasisTopic: string;
   keywords: string[];
   stats?: string[];
+  visualCue?: string;
   speakerReminder: {
     timing: string;
     energy: string;
@@ -33,6 +34,7 @@ interface Deck {
   slideCount: number;
   createdAt: string;
   guides: SlideGuideData[];
+  slideImages?: string[];
 }
 
 const Index = () => {
@@ -44,7 +46,7 @@ const Index = () => {
   const [viewingGuide, setViewingGuide] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
 
-  const extractTextFromPDF = async (file: File): Promise<string[]> => {
+  const extractTextFromPDF = async (file: File): Promise<{ texts: string[]; images: string[] }> => {
     const arrayBuffer = await file.arrayBuffer();
     let pdf;
 
@@ -62,25 +64,39 @@ const Index = () => {
       pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
       pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     }
-    
+
     const pageNumbers = Array.from({ length: pdf.numPages }, (_, index) => index + 1);
-    const slideTexts = await Promise.all(
+    const results = await Promise.all(
       pageNumbers.map(async (pageNumber) => {
         const page = await pdf.getPage(pageNumber);
         try {
+          // Extract text
           const textContent = await page.getTextContent();
           const text = textContent.items
             .map((item) => ('str' in item ? item.str : ''))
             .join(' ')
-            .trim();
-          return text || `Slide ${pageNumber}`;
+            .trim() || `Slide ${pageNumber}`;
+
+          // Render page to canvas for image
+          const viewport = page.getViewport({ scale: 1.5 });
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext('2d')!;
+          await page.render({ canvasContext: ctx, viewport }).promise;
+          const image = canvas.toDataURL('image/jpeg', 0.8);
+
+          return { text, image };
         } finally {
           page.cleanup();
         }
       })
     );
-    
-    return slideTexts;
+
+    return {
+      texts: results.map(r => r.text),
+      images: results.map(r => r.image),
+    };
   };
 
   const extractTextFromPPTX = async (file: File): Promise<string[]> => {
@@ -101,8 +117,11 @@ const Index = () => {
       setProgress(10);
       
       let slideTexts: string[];
+      let slideImages: string[] | undefined;
       if (file.name.toLowerCase().endsWith('.pdf')) {
-        slideTexts = await extractTextFromPDF(file);
+        const result = await extractTextFromPDF(file);
+        slideTexts = result.texts;
+        slideImages = result.images;
       } else {
         slideTexts = await extractTextFromPPTX(file);
       }
@@ -150,6 +169,7 @@ const Index = () => {
         slideCount: data.guides.length,
         createdAt: 'Just now',
         guides: data.guides,
+        slideImages,
       };
       
       setProgress(100);
@@ -188,9 +208,10 @@ const Index = () => {
   // Guide View - Slide by slide focused view
   if (viewingGuide && currentDeck) {
     return (
-      <SpeakerGuideView 
+      <SpeakerGuideView
         guides={currentDeck.guides}
         deckTitle={currentDeck.title}
+        slideImages={currentDeck.slideImages}
         onBack={handleBackToDashboard}
       />
     );

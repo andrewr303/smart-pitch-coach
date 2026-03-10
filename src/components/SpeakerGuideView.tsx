@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Play, Pause, RotateCcw, X, Image, ArrowRight, Lightbulb, MessageCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Pause, RotateCcw, X, Image, ArrowRight, Lightbulb, MessageCircle, Eye, DollarSign, Percent, TrendingUp, Calendar, BarChart3, type LucideIcon } from 'lucide-react';
 
 interface SlideGuideData {
   slideNumber: number;
@@ -9,6 +9,7 @@ interface SlideGuideData {
   emphasisTopic: string;
   keywords: string[];
   stats?: string[];
+  visualCue?: string;
   speakerReminder: {
     timing: string;
     energy: string;
@@ -18,7 +19,28 @@ interface SlideGuideData {
 interface SpeakerGuideViewProps {
   guides: SlideGuideData[];
   deckTitle: string;
+  slideImages?: string[];
   onBack: () => void;
+}
+
+// Highlight numbers, currencies, and percentages in stat strings
+function highlightNumbers(text: string): JSX.Element[] {
+  const parts = text.split(/(\$[\d,.]+[KMBT]?|[\d,.]+%|\b\d+(?:\.\d+)?[KMBT]\b)/g);
+  return parts.map((part, i) => {
+    if (/^\$|[KMBT%]$|^\d/.test(part.trim()) && /\d/.test(part)) {
+      return <span key={i} className="font-bold font-mono text-foreground">{part}</span>;
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
+// Pick an icon for a stat based on keyword heuristics
+function getStatIcon(stat: string): LucideIcon {
+  if (/\$|ARR|revenue|valuation/i.test(stat)) return DollarSign;
+  if (/%|margin|ratio/i.test(stat)) return Percent;
+  if (/grow|break.?even|EBITDA|LTV|CAC|payback/i.test(stat)) return TrendingUp;
+  if (/year|20\d{2}/i.test(stat)) return Calendar;
+  return BarChart3;
 }
 
 // Map slide number to category based on position
@@ -34,7 +56,7 @@ const getSlideCategory = (slideNumber: number, total: number): string => {
   return 'CALL TO ACTION';
 };
 
-export default function SpeakerGuideView({ guides, deckTitle, onBack }: SpeakerGuideViewProps) {
+export default function SpeakerGuideView({ guides, deckTitle, slideImages, onBack }: SpeakerGuideViewProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -195,31 +217,52 @@ export default function SpeakerGuideView({ guides, deckTitle, onBack }: SpeakerG
                 </ul>
               </div>
 
-              {/* Visual Cue */}
+              {/* Key Figures & Visual Cue */}
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xs font-semibold text-muted-foreground tracking-wider">KEY FIGURES</h3>
-                </div>
-                
+                <h3 className="text-xs font-semibold text-muted-foreground tracking-wider mb-4">KEY FIGURES</h3>
+
+                {/* Visual Cue */}
                 <div className="mb-4">
                   <span className="text-xs text-muted-foreground block mb-2">VISUAL CUE</span>
+                  {guide.visualCue ? (
+                    <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 mb-2">
+                      <div className="flex items-start gap-2">
+                        <Eye className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                        <p className="text-sm text-foreground font-medium">{guide.visualCue}</p>
+                      </div>
+                    </div>
+                  ) : null}
                   <button
                     onClick={() => setShowThumbnail(true)}
-                    className="w-full aspect-video bg-muted rounded-lg border border-border hover:border-primary/50 transition-colors flex items-center justify-center group overflow-hidden"
+                    className="w-full aspect-[2/1] bg-muted rounded-lg border border-border hover:border-primary/50 transition-colors flex items-center justify-center group overflow-hidden"
                   >
-                    <div className="text-center p-4">
-                      <Image className="h-8 w-8 text-muted-foreground group-hover:text-primary mx-auto mb-2" />
-                      <span className="text-xs text-muted-foreground italic">Audience View</span>
-                    </div>
+                    {slideImages?.[currentSlide] ? (
+                      <img
+                        src={slideImages[currentSlide]}
+                        alt={`Slide ${currentSlide + 1}`}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <div className="text-center p-3">
+                        <Image className="h-6 w-6 text-muted-foreground group-hover:text-primary mx-auto mb-1" />
+                        <span className="text-xs text-muted-foreground italic">Preview Slide</span>
+                      </div>
+                    )}
                   </button>
                 </div>
 
-                {/* Stats if available */}
+                {/* Stats */}
                 {guide.stats && guide.stats.length > 0 && (
                   <div className="space-y-2">
-                    {guide.stats.map((stat, i) => (
-                      <div key={i} className="text-sm text-success font-medium">{stat}</div>
-                    ))}
+                    {guide.stats.map((stat, i) => {
+                      const Icon = getStatIcon(stat);
+                      return (
+                        <div key={i} className="flex items-start gap-2.5 bg-success/5 border-l-2 border-success rounded-r-lg px-3 py-2">
+                          <Icon className="h-4 w-4 text-success flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-success">{highlightNumbers(stat)}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -295,12 +338,20 @@ export default function SpeakerGuideView({ guides, deckTitle, onBack }: SpeakerG
               <X className="h-5 w-5" />
             </button>
             <div className="bg-card rounded-xl p-4 border border-border shadow-xl">
-              <div className="aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center">
-                <div className="text-center p-8">
-                  <h2 className="text-3xl font-bold text-foreground mb-4">{guide.title}</h2>
-                  <p className="text-xl text-muted-foreground">{guide.emphasisTopic}</p>
+              {slideImages?.[currentSlide] ? (
+                <img
+                  src={slideImages[currentSlide]}
+                  alt={`Slide ${currentSlide + 1}`}
+                  className="w-full rounded-lg"
+                />
+              ) : (
+                <div className="aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center">
+                  <div className="text-center p-8">
+                    <h2 className="text-3xl font-bold text-foreground mb-4">{guide.title}</h2>
+                    <p className="text-xl text-muted-foreground">{guide.emphasisTopic}</p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

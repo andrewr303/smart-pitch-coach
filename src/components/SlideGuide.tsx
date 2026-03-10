@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Zap, ArrowRight, Lightbulb, BarChart3 } from 'lucide-react';
+import { Clock, Zap, ArrowRight, Lightbulb, BarChart3, DollarSign, Percent, TrendingUp, Calendar, Eye, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SlideGuideData {
@@ -11,10 +11,19 @@ interface SlideGuideData {
   emphasisTopic: string;
   keywords: string[];
   stats?: string[];
+  visualCue?: string;
   speakerReminder: {
     timing: string;
     energy: string;
   };
+}
+
+function getStatIcon(stat: string): LucideIcon {
+  if (/\$|ARR|revenue|valuation/i.test(stat)) return DollarSign;
+  if (/%|margin|ratio/i.test(stat)) return Percent;
+  if (/grow|break.?even|EBITDA|LTV|CAC|payback/i.test(stat)) return TrendingUp;
+  if (/year|20\d{2}/i.test(stat)) return Calendar;
+  return BarChart3;
 }
 
 interface SlideGuideProps {
@@ -105,6 +114,16 @@ const SlideGuide: React.FC<SlideGuideProps> = ({
         <p className="text-sm text-foreground">{guide.emphasisTopic}</p>
       </div>
 
+      {/* Visual Cue */}
+      {guide.visualCue && (
+        <div className="mb-4 p-2.5 rounded-lg bg-primary/5 border border-primary/10">
+          <div className="flex items-start gap-2">
+            <Eye className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
+            <span className="text-xs text-foreground font-medium">{guide.visualCue}</span>
+          </div>
+        </div>
+      )}
+
       {/* Stats */}
       {guide.stats && guide.stats.length > 0 && (
         <div className="mb-4">
@@ -112,15 +131,16 @@ const SlideGuide: React.FC<SlideGuideProps> = ({
             <BarChart3 className="h-4 w-4" />
             <span className="text-xs font-semibold uppercase tracking-wide">Key Stats</span>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {guide.stats.map((stat, i) => (
-              <span
-                key={i}
-                className="px-2 py-1 rounded-md bg-success/10 text-success text-xs font-medium"
-              >
-                {stat}
-              </span>
-            ))}
+          <div className="space-y-1.5">
+            {guide.stats.map((stat, i) => {
+              const Icon = getStatIcon(stat);
+              return (
+                <div key={i} className="flex items-start gap-2 bg-success/5 border-l-2 border-success rounded-r-md px-2.5 py-1.5">
+                  <Icon className="h-3.5 w-3.5 text-success flex-shrink-0 mt-0.5" />
+                  <span className="text-xs text-success font-medium">{stat}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

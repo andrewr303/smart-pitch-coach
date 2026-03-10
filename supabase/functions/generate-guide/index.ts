@@ -51,6 +51,7 @@ Rules
 6. Assign a realistic suggested duration (in seconds, displayed as a human-readable string like "90 seconds") and energy level (High / Medium / Low) for each slide based on content density and likely presentation role.
 7. Extract actual statistics, numbers, percentages, or data points from the slide text when present. If no stats exist in a slide, return an empty array for the stats field.
 8. Select 3–5 keywords per slide that represent the core terminology the speaker should naturally weave into their delivery.
+9. Generate a visualCue for every slide — a brief stage direction (max 15 words) telling the speaker what visual element to reference on the slide or what physical action to take (e.g., "Direct attention to the projection table", "Gesture toward the growth chart", "Make eye contact and pause for emphasis").
 You MUST NOT:
 
 Invent statistics, data points, quotes, or factual claims not present in the slide content.
@@ -80,6 +81,7 @@ json[
     "emphasisTopic": "The single most important takeaway the audience must remember from this slide (max 50 words)",
     "keywords": ["keyword1", "keyword2", "keyword3"],
     "stats": ["Any specific numbers, percentages, or data points found in the slide text. Empty array if none."],
+    "visualCue": "Brief stage direction for the speaker — what to reference visually or physically (max 15 words)",
     "speakerReminder": {
       "timing": "90 seconds",
       "energy": "High"
@@ -120,6 +122,7 @@ json{
   "emphasisTopic": "SMB's 31% quarter-over-quarter growth signals a major emerging revenue engine alongside the enterprise core.",
   "keywords": ["revenue growth", "enterprise segment", "SMB expansion", "new ARR", "year-over-year"],
   "stats": ["Total revenue $4.2M (+18% YoY)", "Enterprise $2.8M (67%)", "SMB $1.4M (+31% QoQ)", "New ARR $890K from 12 new logos"],
+  "visualCue": "Direct attention to the revenue breakdown table on screen",
   "speakerReminder": {
     "timing": "90 seconds",
     "energy": "High"
@@ -141,6 +144,7 @@ json{
   "emphasisTopic": "This is a pacing slide — its job is to create a moment of anticipation before the strategic deep-dive.",
   "keywords": ["vision", "2025 strategy", "forward-looking"],
   "stats": [],
+  "visualCue": "Let the title slide sit — pause and scan the room",
   "speakerReminder": {
     "timing": "30 seconds",
     "energy": "Medium"
@@ -165,6 +169,7 @@ json{
   "emphasisTopic": "End with confidence and a clear call to action — the last impression is the lasting impression.",
   "keywords": ["Q&A", "follow-up", "next steps", "contact"],
   "stats": [],
+  "visualCue": "Step forward from the podium to signal openness for Q&A",
   "speakerReminder": {
     "timing": "60 seconds",
     "energy": "Medium"
@@ -189,7 +194,7 @@ Validation
 Before outputting your final response, verify:
 
 Completeness: The JSON array contains exactly one entry per slide provided in the input, in correct sequential order.
-Schema compliance: Every entry contains all required fields (slideNumber, title, keyTalkingPoints, transitionStatement, emphasisTopic, keywords, stats, speakerReminder) with correct types.
+Schema compliance: Every entry contains all required fields (slideNumber, title, keyTalkingPoints, transitionStatement, emphasisTopic, keywords, stats, visualCue, speakerReminder) with correct types.
 Word limits: No individual section exceeds 50 words. Talking points, transitions, and emphasis topics are all within bounds.
 Talking point count: Every slide has exactly 3 talking points.
 Keyword count: Every slide has 3–5 keywords.
@@ -197,6 +202,7 @@ Grounding: Every statistic in the stats field can be traced directly to the slid
 Valid JSON: The output is syntactically valid JSON with properly escaped characters, no trailing commas, and no comments.
 Energy levels: Every energy value is exactly "High", "Medium", or "Low".
 Transitions: Every transition (except the final slide's) naturally leads into the next slide's topic. The final slide's transition serves as a closing statement.
+Visual cues: Every slide has a visualCue string that is a concise stage direction (max 15 words).
 No fabrication: No talking point references data, names, or claims not present in the original slide text.
 </validation>`;
 
