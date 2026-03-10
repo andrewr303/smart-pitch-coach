@@ -9,8 +9,9 @@ import { ArrowLeft, Play, Download, Share2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 interface SlideGuideData {
   slideNumber: number;
@@ -45,7 +46,22 @@ const Index = () => {
 
   const extractTextFromPDF = async (file: File): Promise<string[]> => {
     const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let pdf;
+
+    try {
+      pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    } catch (error) {
+      const shouldFallback =
+        error instanceof Error &&
+        /Setting up fake worker failed|Failed to fetch dynamically imported module/i.test(error.message);
+
+      if (!shouldFallback) {
+        throw error;
+      }
+
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+      pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    }
     
     const slideTexts: string[] = [];
     for (let i = 1; i <= pdf.numPages; i++) {
