@@ -63,16 +63,22 @@ const Index = () => {
       pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     }
     
-    const slideTexts: string[] = [];
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const text = textContent.items
-        .map((item) => ('str' in item ? item.str : ''))
-        .join(' ')
-        .trim();
-      slideTexts.push(text || `Slide ${i}`);
-    }
+    const pageNumbers = Array.from({ length: pdf.numPages }, (_, index) => index + 1);
+    const slideTexts = await Promise.all(
+      pageNumbers.map(async (pageNumber) => {
+        const page = await pdf.getPage(pageNumber);
+        try {
+          const textContent = await page.getTextContent();
+          const text = textContent.items
+            .map((item) => ('str' in item ? item.str : ''))
+            .join(' ')
+            .trim();
+          return text || `Slide ${pageNumber}`;
+        } finally {
+          page.cleanup();
+        }
+      })
+    );
     
     return slideTexts;
   };

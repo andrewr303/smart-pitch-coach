@@ -14,7 +14,8 @@ function sanitizeString(str: string, maxLength: number): string {
     })
     .join('');
 
-  return withoutControlChars.trim().slice(0, maxLength);
+  const compactWhitespace = withoutControlChars.replace(/\s+/g, ' ');
+  return compactWhitespace.trim().slice(0, maxLength);
 }
 
 // System prompt embedded from public/ai/system-prompt.txt
