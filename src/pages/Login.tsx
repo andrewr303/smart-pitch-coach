@@ -55,7 +55,7 @@ const Login: React.FC = () => {
             <Presentation className="h-6 w-6 text-primary-foreground" />
           </div>
           <span className="font-bold text-2xl text-foreground">
-            SmartPitch <span className="text-secondary">Coach</span>
+            PitchCoach <span className="text-secondary">AI</span>
           </span>
         </div>
 

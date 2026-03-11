@@ -17,7 +17,7 @@ const Header: React.FC<HeaderProps> = ({ onNewDeck, showNewButton = true }) => {
             <Presentation className="h-5 w-5 text-primary-foreground" />
           </div>
           <span className="font-bold text-xl text-foreground">
-            SmartPitch <span className="text-secondary">Coach</span>
+            PitchCoach <span className="text-secondary">AI</span>
           </span>
         </div>
 
