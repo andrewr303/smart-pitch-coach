@@ -93,8 +93,6 @@ export default function SpeakerGuideView({ guides, deckTitle, slideImages, onBac
   const guide = guides[currentSlide];
   const totalSlides = guides.length;
   const progress = ((currentSlide + 1) / totalSlides) * 100;
-  const category = getSlideCategory(guide.slideNumber, totalSlides);
-  const categoryColors = CATEGORY_COLORS[category] || CATEGORY_COLORS['VISION & HOOK'];
   const estimatedSeconds = parseTimingToSeconds(guide.speakerReminder.timing);
 
   // Timer state: green -> amber -> red based on elapsed vs estimated
@@ -337,17 +335,9 @@ export default function SpeakerGuideView({ guides, deckTitle, slideImages, onBac
             {/* Slide header */}
             <div className="flex items-start justify-between mb-8">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className={cn(
-                    'text-overline uppercase px-2.5 py-1 rounded-md border',
-                    categoryColors.bg, categoryColors.text, categoryColors.border
-                  )}>
-                    {category}
-                  </span>
-                  <span className="text-overline text-muted-foreground">
-                    Slide {currentSlide + 1}
-                  </span>
-                </div>
+                <span className="text-overline text-muted-foreground mb-2 block">
+                  Slide {currentSlide + 1}
+                </span>
                 <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground leading-tight">
                   {guide.title}
                 </h1>
@@ -393,7 +383,7 @@ export default function SpeakerGuideView({ guides, deckTitle, slideImages, onBac
                       <div className="h-7 w-7 rounded-lg gradient-primary flex items-center justify-center flex-shrink-0 mt-0.5">
                         <span className="text-xs font-bold text-primary-foreground">{i + 1}</span>
                       </div>
-                      <p className="text-foreground leading-relaxed pt-0.5">{point}</p>
+                      <p className="text-[1.05rem] text-foreground leading-relaxed pt-0.5">{point}</p>
                     </div>
                   ))}
                 </div>
