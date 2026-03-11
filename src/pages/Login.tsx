@@ -50,11 +50,8 @@ const Login: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md animate-slide-up">
         {/* Branding */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <img src="/pitchcoachAIlogo.png" alt="PitchCoach AI" className="h-10 w-auto" />
-          <span className="font-bold text-2xl text-foreground">
-            PitchCoach <span className="text-secondary">AI</span>
-          </span>
+        <div className="flex justify-center mb-8">
+          <img src="/pitchcoachAIlogo.png" alt="PitchCoach AI" className="h-16 w-auto" />
         </div>
 
         <Card>

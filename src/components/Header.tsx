@@ -10,13 +10,10 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onNewDeck, showNewButton = true }) => {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border glass-effect">
-      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
+      <div className="container flex h-20 items-center justify-between px-4 md:px-6">
         {/* Logo */}
-        <div className="flex items-center gap-2">
-          <img src="/pitchcoachAIlogo.png" alt="PitchCoach AI" className="h-9 w-auto" />
-          <span className="font-bold text-xl text-foreground">
-            PitchCoach <span className="text-secondary">AI</span>
-          </span>
+        <div className="flex items-center">
+          <img src="/pitchcoachAIlogo.png" alt="PitchCoach AI" className="h-14 w-auto" />
         </div>
 
         {/* Actions */}

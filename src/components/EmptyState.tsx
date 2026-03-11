@@ -29,9 +29,6 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       <div className="max-w-2xl w-full">
         {/* Hero Section */}
         <div className="text-center mb-8 animate-slide-up">
-          <div className="inline-flex items-center justify-center h-20 w-20 rounded-2xl bg-primary/10 mb-6 animate-float">
-            <img src="/pitchcoachAIlogo.png" alt="PitchCoach AI" className="h-10 w-10 object-contain" />
-          </div>
           <h1 className="text-3xl md:text-4xl text-foreground mb-3 font-extrabold text-center">
             Welcome to <span className="text-primary font-extrabold">PitchCoach AI</span>
           </h1>
