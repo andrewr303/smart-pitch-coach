@@ -1,5 +1,5 @@
 import React from 'react';
-import { Presentation, Plus, User, Settings } from 'lucide-react';
+import { Plus, User, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface HeaderProps {
@@ -13,9 +13,7 @@ const Header: React.FC<HeaderProps> = ({ onNewDeck, showNewButton = true }) => {
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <div className="h-9 w-9 rounded-lg gradient-primary flex items-center justify-center">
-            <Presentation className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <img src="/pitchcoachAIlogo.png" alt="PitchCoach AI" className="h-9 w-auto" />
           <span className="font-bold text-xl text-foreground">
             PitchCoach <span className="text-secondary">AI</span>
           </span>

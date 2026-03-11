@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Presentation } from 'lucide-react';
+
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,9 +51,7 @@ const Login: React.FC = () => {
       <div className="w-full max-w-md animate-slide-up">
         {/* Branding */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center">
-            <Presentation className="h-6 w-6 text-primary-foreground" />
-          </div>
+          <img src="/pitchcoachAIlogo.png" alt="PitchCoach AI" className="h-10 w-auto" />
           <span className="font-bold text-2xl text-foreground">
             PitchCoach <span className="text-secondary">AI</span>
           </span>
