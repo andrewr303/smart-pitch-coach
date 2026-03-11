@@ -114,6 +114,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 />
               </div>
               <p className="text-xs text-muted-foreground text-center mt-2">{progress}% complete</p>
+              <p className="text-xs text-muted-foreground/70 text-center mt-3">
+                This may take a moment — we're carefully analyzing each slide to give you the best possible speaker guide.
+              </p>
             </div>
           </div>
         </div>
