@@ -348,7 +348,7 @@ export default function SpeakerGuideView({ guides, deckTitle, slideImages, onBac
                 timerState === 'warning' ? 'bg-warning/5 border-warning/20' :
                 'bg-muted/50 border-border'
               )}>
-                <span className={cn('text-sm font-bold font-mono', timerColorClass)}>
+                <span className={cn('text-xs font-bold font-mono whitespace-nowrap', timerColorClass)}>
                   {guide.speakerReminder.timing}
                 </span>
               </div>
