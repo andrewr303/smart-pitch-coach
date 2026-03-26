@@ -144,19 +144,19 @@ const Index = () => {
         try {
           const ctx = (error as any).context;
           if (ctx instanceof Response) {
-            const body = await ctx.json();
-            detail = body?.error;
+            // Read body as text first (always works), then try JSON parsing.
+            // A Response body can only be consumed once — calling .json() then
+            // .text() on the same Response would fail silently.
+            const text = await ctx.text();
+            try {
+              const body = JSON.parse(text);
+              detail = body?.error;
+            } catch {
+              if (text) detail = text;
+            }
           }
         } catch {
-          // Context may not be JSON — try text
-          try {
-            const ctx = (error as any).context;
-            if (ctx instanceof Response) {
-              detail = await ctx.text();
-            }
-          } catch {
-            // ignore – fall through to generic message
-          }
+          // ignore – fall through to generic message
         }
         console.error('Edge function error:', { message: error.message, detail });
         throw new Error(detail || error.message || 'Failed to generate guides. Please check your connection and try again.');
