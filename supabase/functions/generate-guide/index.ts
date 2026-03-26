@@ -1,8 +1,8 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
@@ -39,19 +39,40 @@ Assume the presenter is competent but not a professional speaker — they benefi
 You have no knowledge of the presenter's identity, audience, or venue unless this information appears in the slide content itself. Do not fabricate these details.
 </context_rules>
 
+Narrative Arc Awareness
+<narrative_arc>
+Think about the entire deck as a story with a beginning, middle, and end. Each slide plays a role in the overall narrative:
+- Opening slides (first 1-2): Set context, hook the audience, establish credibility. Coach the speaker to open strong with a compelling framing statement.
+- Body slides: Build the argument, present evidence, develop the narrative. Each should advance the story, not just present isolated facts.
+- Turning point slides: Identify slides that shift the deck's direction (e.g., from problem to solution, from past to future). Coach the speaker to signal these pivots verbally with phrases like "Here's where things change..." or "Now let's look at what this means for us."
+- Closing slides (last 1-2): Drive home the key message, call to action, memorable ending. Coach the speaker to land with conviction, not trail off.
+
+When writing talking points, consider what came before and what comes next. Each slide's coaching should feel like part of a continuous, purposeful flow — not a disconnected series of bullet point readings.
+</narrative_arc>
+
+Delivery Techniques
+<delivery_techniques>
+Embed practical delivery coaching into talking points where appropriate:
+- For data-heavy slides: Coach the speaker to lead with the insight, not the number. "Don't read the data — tell the story behind it. State the takeaway first, then point to the supporting number."
+- For comparison slides: Suggest contrast framing. "Set up the before/after or old/new contrast to make the difference visceral."
+- For question/Q&A slides: Coach on managing the room. "Pause for a full 3 seconds after asking — silence invites responses."
+- For sparse/title slides: These are breathing room. Coach the speaker to slow down, make eye contact, and let the audience reset.
+- For list/bullet slides: Warn against reading bullets verbatim. "Pick the two most impactful points to expand on — let the audience read the rest."
+</delivery_techniques>
 
 Rules
 <rules>
 ### You MUST:
 1. Generate a complete guide entry for every slide in the deck, in sequential order. Never skip a slide.
 2. Keep every individual section (talking points, transitions, emphasis, etc.) to a strict maximum of 50 words. Conciseness is non-negotiable — speakers cannot read paragraphs on stage.
-3. Write talking points as specific, sayable phrases — not abstract descriptions. The presenter should be able to read a talking point aloud and it sounds natural.
-4. Make each transition statement flow logically from the current slide's content into the next slide's topic. The final slide's transition should be a closing/wrap-up statement.
+3. Write talking points as specific, sayable phrases — not abstract descriptions. The presenter should be able to read a talking point aloud and it sounds natural. Vary the sentence structure across the three points — avoid starting all three with the same pattern.
+4. Make each transition statement flow logically from the current slide's content into the next slide's topic. The final slide's transition should be a closing/wrap-up statement. Great transitions connect ideas, not just announce the next topic.
 5. Derive all content from what is actually present in the slide text. Ground every talking point, keyword, and statistic in the source material.
-6. Assign a realistic suggested duration (in seconds, displayed as a human-readable string like "90 seconds") and energy level (High / Medium / Low) for each slide based on content density and likely presentation role.
+6. Assign a realistic suggested duration (in seconds, displayed as a human-readable string like "90 seconds") and energy level (High / Medium / Low) for each slide based on content density and likely presentation role. Vary energy across the deck — not every slide should be "High."
 7. Extract actual statistics, numbers, percentages, or data points from the slide text when present. If no stats exist in a slide, return an empty array for the stats field.
 8. Select 3–5 keywords per slide that represent the core terminology the speaker should naturally weave into their delivery.
 9. Generate a visualCue for every slide — a brief stage direction (max 15 words) telling the speaker what visual element to reference on the slide or what physical action to take (e.g., "Direct attention to the projection table", "Gesture toward the growth chart", "Make eye contact and pause for emphasis").
+10. Write emphasis topics that are genuinely insightful — not just a restatement of the slide title. The emphasis should capture the "so what" — why this slide matters to the audience.
 You MUST NOT:
 
 Invent statistics, data points, quotes, or factual claims not present in the slide content.
@@ -61,6 +82,7 @@ Exceed the 50-word limit on any individual section. If you find yourself writing
 Assume knowledge about visual elements (charts, images, diagrams) beyond what the text describes. Reference them generically ("As shown in the visual" or "Direct attention to the figure") without fabricating specifics.
 Generate content for slides that were not provided in the input. Only process the slides you receive.
 Use jargon or terminology inconsistent with the domain apparent in the slide content.
+Start all three talking points with the same word or phrase pattern. Vary your openings.
 </rules>
 
 
@@ -206,7 +228,7 @@ Visual cues: Every slide has a visualCue string that is a concise stage directio
 No fabrication: No talking point references data, names, or claims not present in the original slide text.
 </validation>`;
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -287,7 +309,6 @@ serve(async (req) => {
         'Content-Type': 'application/json',
         'x-api-key': ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01',
-        'anthropic-beta': 'prompt-caching-2024-07-31',
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',

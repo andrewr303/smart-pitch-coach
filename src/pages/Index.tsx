@@ -148,9 +148,18 @@ const Index = () => {
             detail = body?.error;
           }
         } catch {
-          // ignore – fall through to generic message
+          // Context may not be JSON — try text
+          try {
+            const ctx = (error as any).context;
+            if (ctx instanceof Response) {
+              detail = await ctx.text();
+            }
+          } catch {
+            // ignore – fall through to generic message
+          }
         }
-        throw new Error(detail || error.message || 'Failed to generate guides');
+        console.error('Edge function error:', { message: error.message, detail });
+        throw new Error(detail || error.message || 'Failed to generate guides. Please check your connection and try again.');
       }
 
       if (data?.error) {
