@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Play, Pause, RotateCcw, X, Image, ArrowRight, Lightbulb, MessageCircle, Eye, DollarSign, Percent, TrendingUp, Calendar, BarChart3, type LucideIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Pause, RotateCcw, X, Image, ArrowRight, Lightbulb, MessageCircle, Eye, DollarSign, Percent, TrendingUp, Calendar, BarChart3, Menu, type LucideIcon } from 'lucide-react';
 
 interface SlideGuideData {
   slideNumber: number;
@@ -61,6 +61,7 @@ export default function SpeakerGuideView({ guides, deckTitle, slideImages, onBac
   const [isPlaying, setIsPlaying] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [showThumbnail, setShowThumbnail] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const guide = guides[currentSlide];
   const totalSlides = guides.length;
@@ -84,6 +85,7 @@ export default function SpeakerGuideView({ guides, deckTitle, slideImages, onBac
   const goToSlide = useCallback((index: number) => {
     if (index >= 0 && index < totalSlides) {
       setCurrentSlide(index);
+      setSidebarOpen(false);
     }
   }, [totalSlides]);
 
@@ -92,35 +94,43 @@ export default function SpeakerGuideView({ guides, deckTitle, slideImages, onBac
       if (e.key === 'ArrowRight') goToSlide(currentSlide + 1);
       if (e.key === 'ArrowLeft') goToSlide(currentSlide - 1);
       if (e.key === ' ') { e.preventDefault(); setIsPlaying(!isPlaying); }
-      if (e.key === 'Escape') onBack();
+      if (e.key === 'Escape') sidebarOpen ? setSidebarOpen(false) : onBack();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentSlide, isPlaying, onBack, goToSlide]);
+  }, [currentSlide, isPlaying, onBack, goToSlide, sidebarOpen]);
 
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-border bg-card flex-shrink-0">
-        <div className="flex items-center gap-3">
+      <header className="flex items-center justify-between px-3 md:px-4 py-2 md:py-3 border-b border-border bg-card flex-shrink-0">
+        <div className="flex items-center gap-2 md:gap-3">
+          {/* Mobile menu button */}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="md:hidden p-1.5 hover:bg-muted rounded-lg transition-colors"
+            aria-label="Toggle slide list"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
           <button onClick={onBack} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <MessageCircle className="h-4 w-4 text-primary-foreground" />
+            <div className="h-7 w-7 md:h-8 md:w-8 rounded-lg bg-primary flex items-center justify-center">
+              <MessageCircle className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary-foreground" />
             </div>
-            <span className="font-semibold text-foreground">SpeakerGuide</span>
+            <span className="font-semibold text-foreground text-sm md:text-base hidden sm:inline">SpeakerGuide</span>
           </button>
         </div>
 
-        <div className="flex items-center gap-3 bg-muted rounded-full px-4 py-2">
+        <div className="flex items-center gap-2 md:gap-3 bg-muted rounded-full px-3 md:px-4 py-1.5 md:py-2">
           <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
-          <span className="font-mono text-foreground">{formatTime(elapsedTime)}</span>
+          <span className="font-mono text-foreground text-sm md:text-base">{formatTime(elapsedTime)}</span>
           <button
             onClick={() => setIsPlaying(!isPlaying)}
             className="p-1 hover:bg-accent/20 rounded transition-colors"
             aria-label={isPlaying ? 'Pause timer' : 'Start timer'}
             title={isPlaying ? 'Pause timer' : 'Start timer'}
           >
-            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            {isPlaying ? <Pause className="h-3.5 w-3.5 md:h-4 md:w-4" /> : <Play className="h-3.5 w-3.5 md:h-4 md:w-4" />}
           </button>
           <button
             onClick={() => setElapsedTime(0)}
@@ -128,20 +138,34 @@ export default function SpeakerGuideView({ guides, deckTitle, slideImages, onBac
             aria-label="Reset timer"
             title="Reset timer"
           >
-            <RotateCcw className="h-4 w-4" />
+            <RotateCcw className="h-3.5 w-3.5 md:h-4 md:w-4" />
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">STATUS:</span>
-          <span className="text-sm font-medium text-success">LIVE</span>
+        <div className="flex items-center gap-1.5 md:gap-2">
+          <span className="text-xs md:text-sm text-muted-foreground hidden sm:inline">STATUS:</span>
+          <span className="text-xs md:text-sm font-medium text-success">LIVE</span>
           <div className="h-2 w-2 rounded-full bg-success" />
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <aside className="w-56 border-r border-border bg-card overflow-y-auto flex-shrink-0">
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Mobile Sidebar Overlay */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-background/60 backdrop-blur-sm z-30 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* Sidebar — hidden on mobile, slides in when toggled */}
+        <aside className={`
+          fixed md:relative inset-y-0 left-0 z-40 md:z-auto
+          w-64 md:w-56 border-r border-border bg-card overflow-y-auto flex-shrink-0
+          transform transition-transform duration-200 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          top-[49px] md:top-0
+        `}>
           <div className="p-4 border-b border-border flex items-center justify-between">
             <span className="text-sm font-medium text-muted-foreground">SLIDES</span>
             <span className="text-xs bg-muted px-2 py-1 rounded text-muted-foreground">{currentSlide + 1}/{totalSlides}</span>
@@ -150,10 +174,10 @@ export default function SpeakerGuideView({ guides, deckTitle, slideImages, onBac
             {guides.map((g, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentSlide(index)}
+                onClick={() => goToSlide(index)}
                 className={`w-full text-left p-3 rounded-lg mb-1 transition-colors ${
-                  currentSlide === index 
-                    ? 'bg-primary/10 border border-primary/30' 
+                  currentSlide === index
+                    ? 'bg-primary/10 border border-primary/30'
                     : 'hover:bg-muted'
                 }`}
               >
@@ -170,10 +194,10 @@ export default function SpeakerGuideView({ guides, deckTitle, slideImages, onBac
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
           {/* Progress Bar */}
-          <div className="h-1 bg-muted rounded-full mb-6 overflow-hidden">
-            <div 
+          <div className="h-1 bg-muted rounded-full mb-4 md:mb-6 overflow-hidden">
+            <div
               className="h-full bg-success transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
@@ -181,37 +205,37 @@ export default function SpeakerGuideView({ guides, deckTitle, slideImages, onBac
 
           <div className="max-w-4xl mx-auto">
             {/* Header Section */}
-            <div className="flex items-start justify-between mb-6">
-              <div>
+            <div className="flex items-start justify-between gap-3 mb-4 md:mb-6">
+              <div className="min-w-0 flex-1">
                 <span className="text-xs font-semibold text-success tracking-wider">{category}</span>
-                <h1 className="text-3xl font-bold text-foreground mt-1">{guide.title}</h1>
+                <h1 className="text-xl md:text-3xl font-bold text-foreground mt-1 leading-tight">{guide.title}</h1>
               </div>
-              <div className="bg-muted rounded-xl px-4 py-3 text-center">
-                <span className="text-xs text-muted-foreground block">EST. TIME</span>
-                <span className="text-xl font-bold text-foreground">{guide.speakerReminder.timing}</span>
+              <div className="bg-muted rounded-xl px-3 md:px-4 py-2 md:py-3 text-center flex-shrink-0">
+                <span className="text-[10px] md:text-xs text-muted-foreground block">EST. TIME</span>
+                <span className="text-base md:text-xl font-bold text-foreground">{guide.speakerReminder.timing}</span>
               </div>
             </div>
 
             {/* Core Message */}
-            <div className="bg-card border-l-4 border-success rounded-lg p-5 mb-6">
-              <div className="flex items-center gap-2 text-success mb-2">
+            <div className="bg-card border-l-4 border-success rounded-lg p-3 md:p-5 mb-4 md:mb-6">
+              <div className="flex items-center gap-2 text-success mb-1.5 md:mb-2">
                 <Lightbulb className="h-4 w-4" />
                 <span className="text-xs font-semibold tracking-wider">CORE MESSAGE</span>
               </div>
-              <p className="text-lg text-foreground">{guide.emphasisTopic}</p>
+              <p className="text-sm md:text-lg text-foreground">{guide.emphasisTopic}</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
               {/* Talking Points */}
               <div className="lg:col-span-2">
-                <h3 className="text-xs font-semibold text-muted-foreground tracking-wider mb-4">TALKING POINTS</h3>
-                <ul className="space-y-3">
+                <h3 className="text-xs font-semibold text-muted-foreground tracking-wider mb-3 md:mb-4">TALKING POINTS</h3>
+                <ul className="space-y-2.5 md:space-y-3">
                   {guide.keyTalkingPoints.map((point, i) => (
-                    <li key={i} className="flex items-start gap-3">
+                    <li key={i} className="flex items-start gap-2.5 md:gap-3">
                       <div className="h-5 w-5 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                         <div className="h-2 w-2 rounded-full bg-success" />
                       </div>
-                      <span className="text-foreground">{point}</span>
+                      <span className="text-sm md:text-base text-foreground">{point}</span>
                     </li>
                   ))}
                 </ul>
@@ -219,16 +243,16 @@ export default function SpeakerGuideView({ guides, deckTitle, slideImages, onBac
 
               {/* Key Figures & Visual Cue */}
               <div>
-                <h3 className="text-xs font-semibold text-muted-foreground tracking-wider mb-4">KEY FIGURES</h3>
+                <h3 className="text-xs font-semibold text-muted-foreground tracking-wider mb-3 md:mb-4">KEY FIGURES</h3>
 
                 {/* Visual Cue */}
-                <div className="mb-4">
+                <div className="mb-3 md:mb-4">
                   <span className="text-xs text-muted-foreground block mb-2">VISUAL CUE</span>
                   {guide.visualCue ? (
-                    <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 mb-2">
+                    <div className="bg-primary/5 border border-primary/20 rounded-lg p-2.5 md:p-3 mb-2">
                       <div className="flex items-start gap-2">
                         <Eye className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
-                        <p className="text-sm text-foreground font-medium">{guide.visualCue}</p>
+                        <p className="text-xs md:text-sm text-foreground font-medium">{guide.visualCue}</p>
                       </div>
                     </div>
                   ) : null}
@@ -253,13 +277,13 @@ export default function SpeakerGuideView({ guides, deckTitle, slideImages, onBac
 
                 {/* Stats */}
                 {guide.stats && guide.stats.length > 0 && (
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 md:space-y-2">
                     {guide.stats.map((stat, i) => {
                       const Icon = getStatIcon(stat);
                       return (
-                        <div key={i} className="flex items-start gap-2.5 bg-success/5 border-l-2 border-success rounded-r-lg px-3 py-2">
-                          <Icon className="h-4 w-4 text-success flex-shrink-0 mt-0.5" />
-                          <span className="text-sm text-success">{highlightNumbers(stat)}</span>
+                        <div key={i} className="flex items-start gap-2 md:gap-2.5 bg-success/5 border-l-2 border-success rounded-r-lg px-2.5 md:px-3 py-1.5 md:py-2">
+                          <Icon className="h-3.5 w-3.5 md:h-4 md:w-4 text-success flex-shrink-0 mt-0.5" />
+                          <span className="text-xs md:text-sm text-success">{highlightNumbers(stat)}</span>
                         </div>
                       );
                     })}
@@ -269,13 +293,13 @@ export default function SpeakerGuideView({ guides, deckTitle, slideImages, onBac
             </div>
 
             {/* Keywords */}
-            <div className="mb-6">
-              <h3 className="text-xs font-semibold text-muted-foreground tracking-wider mb-3">KEYWORDS</h3>
-              <div className="flex flex-wrap gap-3">
+            <div className="mb-4 md:mb-6">
+              <h3 className="text-xs font-semibold text-muted-foreground tracking-wider mb-2 md:mb-3">KEYWORDS</h3>
+              <div className="flex flex-wrap gap-1.5 md:gap-3">
                 {guide.keywords.map((keyword, i) => (
                   <span
                     key={i}
-                    className="px-4 py-2 rounded-full bg-primary/10 text-primary font-semibold text-base border border-primary/20"
+                    className="px-2.5 md:px-4 py-1 md:py-2 rounded-full bg-primary/10 text-primary font-semibold text-xs md:text-base border border-primary/20"
                   >
                     {keyword}
                   </span>
@@ -284,37 +308,37 @@ export default function SpeakerGuideView({ guides, deckTitle, slideImages, onBac
             </div>
 
             {/* Transition */}
-            <div className="border-t border-border pt-6">
-              <div className="flex items-center gap-2 text-warning mb-2">
+            <div className="border-t border-border pt-4 md:pt-6">
+              <div className="flex items-center gap-2 text-warning mb-1.5 md:mb-2">
                 <ArrowRight className="h-4 w-4" />
                 <ArrowRight className="h-4 w-4 -ml-3" />
                 <span className="text-xs font-semibold tracking-wider">TRANSITION TO NEXT SLIDE</span>
               </div>
-              <p className="text-lg text-foreground italic">"{guide.transitionStatement}"</p>
+              <p className="text-sm md:text-lg text-foreground italic">"{guide.transitionStatement}"</p>
             </div>
 
             {/* Navigation */}
-            <div className="flex items-center justify-center gap-4 mt-8 pt-6 border-t border-border">
+            <div className="flex items-center justify-center gap-3 md:gap-4 mt-6 md:mt-8 pt-4 md:pt-6 border-t border-border pb-4">
               <button
                 onClick={() => goToSlide(currentSlide - 1)}
                 disabled={currentSlide === 0}
-                className="h-12 w-12 rounded-full bg-muted flex items-center justify-center disabled:opacity-40 hover:bg-accent/20 transition-colors"
+                className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-muted flex items-center justify-center disabled:opacity-40 hover:bg-accent/20 transition-colors"
                 aria-label="Previous slide"
                 title="Previous slide"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
-              
-              <div className="bg-muted rounded-full px-6 py-3">
-                <span className="text-foreground">
+
+              <div className="bg-muted rounded-full px-4 md:px-6 py-2 md:py-3">
+                <span className="text-sm md:text-base text-foreground">
                   Slide <span className="font-bold">{currentSlide + 1}</span> / {totalSlides}
                 </span>
               </div>
-              
+
               <button
                 onClick={() => goToSlide(currentSlide + 1)}
                 disabled={currentSlide === totalSlides - 1}
-                className="h-12 w-12 rounded-full bg-success flex items-center justify-center disabled:opacity-40 hover:bg-success/80 transition-colors"
+                className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-success flex items-center justify-center disabled:opacity-40 hover:bg-success/80 transition-colors"
                 aria-label="Next slide"
                 title="Next slide"
               >
@@ -327,7 +351,7 @@ export default function SpeakerGuideView({ guides, deckTitle, slideImages, onBac
 
       {/* Thumbnail Modal */}
       {showThumbnail && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-8">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 md:p-8">
           <div className="relative max-w-4xl w-full">
             <button
               onClick={() => setShowThumbnail(false)}
