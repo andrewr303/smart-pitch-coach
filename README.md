@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/pitchcoachAIlogo.png" alt="PitchCoach AI" width="80" />
+<img src="public/pitchcoachAIlogo.png" alt="PitchCoach AI" width="300" />
 
 # PitchCoach AI
 
