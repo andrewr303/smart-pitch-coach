@@ -9,8 +9,6 @@
 Upload a PDF or PPTX. Get instant, structured coaching — talking points, transitions, timing cues, and stage directions — so you can present with confidence.
 
 [![Live App](https://img.shields.io/badge/Live%20App-pitchcoach.founderpilot.ai-6366f1?style=flat-square&logo=vercel)](https://pitchcoach.founderpilot.ai)
-[![Demo](https://img.shields.io/badge/Demo-guide--my--pitch.lovable.app-0ea5e9?style=flat-square&logo=globe)](https://guide-my-pitch.lovable.app)
-[![Stack](https://img.shields.io/badge/Stack-React%20%2B%20Supabase%20%2B%20Claude-f59e0b?style=flat-square)](https://github.com/andrewr303/smart-pitch-coach)
 
 </div>
 
