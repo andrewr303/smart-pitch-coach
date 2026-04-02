@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="public/pitchcoachAIlogo.png" alt="PitchCoach AI" width="80" />
+<img src="public/pitchcoachAIlogo.png" alt="PitchCoach AI" width="420" />
 
-# PitchCoach AI
+<br /><br />
 
 **AI-powered speaker guides for every slide in your deck.**
 
